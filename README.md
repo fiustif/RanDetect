@@ -6,5 +6,6 @@ Usage:
  * Run Mgen and create a model (the sample string needs to be only of 1 and 0)
  * Run Mcomp and compare a string to the model
 
-![image](https://github.com/fiustif/RanDetect/assets/40177255/4cf1bb75-d9ec-49ee-a512-0527012a5887)
-![image](https://github.com/fiustif/RanDetect/assets/40177255/4d3c3fbb-e9a3-4c16-8f45-bf94a5f0b04b)
+
+![1](https://github.com/fiustif/RanDetect/assets/40177255/9b1103fd-a76c-49d3-863c-c24bef52f446)
+![2](https://github.com/fiustif/RanDetect/assets/40177255/6d64f934-a3fd-4675-a7b1-ad794deb9913)
