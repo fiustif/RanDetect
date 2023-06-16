@@ -134,8 +134,7 @@ void save_to_file(int type)
                 }
                 fprintf(Model, "\n");
             }
-            fprintf(Model, "\n");
-        }
+        fprintf(Model, "\n");
         break;
     case 2: ;
         FILE *Conf = fopen("Config.r4nd", "w");
