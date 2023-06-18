@@ -3,6 +3,8 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
+#include <sys/stat.h>
+#include <time.h>
 
 //generator settings
 
@@ -12,7 +14,6 @@
 #define L_CONF_Y 30                         //Y config size (bigger means more precision but also more noise) (must be >= L_MOD_Y)
 #define L_MOD_X 5                           //X model size (bigger means more precision but also more noise)
 #define L_MOD_Y 30                          //Y model size (bigger means more precision but also more noise)
-#define L_TRIG 5                            //N of 0 in the model to stop calculating the configuration
 #define CONF_MULT 0.025                     //configuration multiplier used to calculate the multipliers for the configuration (should be the same in the validation)
 #define MAX_MULT 1                          //max multiplier
 
@@ -20,25 +21,25 @@
 
 
 This is the model and configuration generator program for RanDetect.
-Developed by fiustif and Nick806 in 2023.
+Casually developed by fiustif and Nick806 in 2023.
 
-Suggested settings for 8000 char dataset and 2000 char test sample:
+Suggested settings for 4000 char dataset and 2000 char test sample:
 
-LEN:        8000
-N_STRINGS:  4
+LEN:        4000
+N_STRINGS:  2
 L_CONF_X:   5
 L_CONF_Y:   30
-L_TRIG:     5
+L_MOD_X:    L_CONF_X
+L_MOD_Y:    L_CONF_Y
 CONF_MULT:  2
 
 
 **/
 
-
-
 char input[LEN];                                                            //input dataset
 double data [N_STRINGS][LEN/N_STRINGS][LEN/N_STRINGS] = {0};                //raw model [N of rep][rep dist to next rep N]
-double config [L_CONF_X][L_CONF_Y] = {0};                                   //contains configuration multipliers for the verification
+double mult [L_CONF_X][L_CONF_Y] = {0};                                   //contains configuration multipliers for the verification
+float Dist;
 
 void generate_model()                       //model generation
 {
@@ -82,7 +83,7 @@ void generate_model()                       //model generation
     return;
 }
 
-void generate_config()                      //generate multipliers for the verification
+void generate_multipliers()                      //generate multipliers for the verification
 {
     int i, x, k;
     for(i=0;i<L_CONF_X;i++)                 //calculate average absolute delta between reps
@@ -91,12 +92,12 @@ void generate_config()                      //generate multipliers for the verif
         {
             for(k=0;k<N_STRINGS;k++)
             {
-                config[i][x] += fabs(data[0][i][x]-data[k][i][x]);
+                mult[i][x] += fabs(data[0][i][x]-data[k][i][x]);
             }
-            if(CONF_MULT*(config[i][x]/N_STRINGS)>MAX_MULT)
-            config[i][x] = MAX_MULT;
+            if(CONF_MULT*(mult[i][x]/N_STRINGS)>MAX_MULT)
+            mult[i][x] = MAX_MULT;
             else
-            config[i][x] = CONF_MULT*(config[i][x]/N_STRINGS);
+            mult[i][x] = CONF_MULT*(mult[i][x]/N_STRINGS);
         }
     }
     return;
@@ -118,40 +119,68 @@ void normalize_model()
     }
 }
 
-void save_to_file(int type)
+void save_to_file()
 {
     int i, j, k;
-    switch(type)
+    time_t now1 = time(NULL);
+    struct tm *t1 = localtime(&now1);
+    char folder_name[100];
+    strftime(folder_name, sizeof(folder_name), "Model-%Y%m%d-%H%M%S", t1);
+    struct stat st1 = {0};
+    if (stat(folder_name, &st1) == -1)
     {
-    case 1: ;
-        FILE *Model = fopen("Model.r4nd", "w");
-        if (Model)
-        {
-            for (j = 0; j < L_MOD_X; j++)
-            {
-                for (k = 0; k < L_MOD_Y; k++)
+        mkdir(folder_name, 0700);
+    }
+
+    char file_path[100];
+
+    snprintf(file_path, sizeof(file_path), "%s/Model.r4nd", folder_name);
+    FILE *Model = fopen(file_path, "w");
+        if (Model) {
+            for (j = 0; j < L_MOD_X; j++) {
+                for (k = 0; k < L_MOD_Y; k++){
                     fprintf(Model, "%lf, ", data[0][j][k]);
                 }
                 fprintf(Model, "\n");
             }
-        fprintf(Model, "\n");
-        break;
-    case 2: ;
-        FILE *Conf = fopen("Config.r4nd", "w");
-        if (Conf)
-        {
-            for (j = 0; j < L_CONF_X; j++)
-            {
-                for (k = 0; k < L_CONF_Y; k++)
-                {
-                    fprintf(Conf, "%lf, ", config[j][k]);
-                }
-                fprintf(Conf, "\n");
+            fprintf(Model, "\n");
+            fclose(Model);
+        }
+
+    snprintf(file_path, sizeof(file_path), "%s/Multipliers.r4nd", folder_name);
+    FILE *Conf = fopen(file_path, "w");
+    if (Conf) {
+        for (j = 0; j < L_CONF_X; j++) {
+            for (k = 0; k < L_CONF_Y; k++) {
+                fprintf(Conf, "%lf, ", mult[j][k]);
             }
             fprintf(Conf, "\n");
         }
+        fprintf(Conf, "\n");
+        fclose(Conf);
     }
+
+    snprintf(file_path, sizeof(file_path), "%s/Alignment.r4nd", folder_name);
+    FILE *Allign = fopen(file_path, "w");
+    if (Allign) {
+        fprintf(Allign, "%lf ", Dist);
+    }
+
     return;
+}
+
+void align_model ()    //needed for non optimized configurations
+{
+    int i, x, k;
+    for(k=1;k<N_STRINGS;k++)
+    for(i=0;i<L_MOD_X;i++)
+    {
+        for(x=0;x<L_MOD_Y;x++)
+        {
+            Dist += fabs(data[0][i][x] - data[k][i][x])*mult[i][x]; //calculate distance between the strings and the generated dataset
+        }
+    }
+    Dist = Dist/N_STRINGS;
 }
 
 void validateconfig()
@@ -175,7 +204,7 @@ int main()
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mGen 1.2\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mGen 1.3\n\n";
 
     printf("%s", banner);
 
@@ -189,20 +218,22 @@ int main()
     generate_model();
     printf("    [DONE]\n");
 
-    printf("[*] Generating configuration...  ");
-    generate_config();
+    printf("[*] Generating multipliers...    ");
+    generate_multipliers();
     printf("    [DONE]\n");
 
     printf("[*] Normalizing model...         ");
     normalize_model();
     printf("    [DONE]\n");
 
-    printf("[*] Saving statistic model...    ");
-    save_to_file(1);
+    printf("[*] Aligning model...            ");
+    align_model();
     printf("    [DONE]\n");
 
-    printf("[*] Saving Config...             ");
-    save_to_file(2);
+    printf("\n[*] [INFO] alignment factor: [%lf]\n\n", Dist);
+
+    printf("[*] Saving statistic model...    ");
+    save_to_file();
     printf("    [DONE]\n");
 
     return 0;
