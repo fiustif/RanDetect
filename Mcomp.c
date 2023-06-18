@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-//generator settings
+//comparator settings
 
 #define LEN 4000                            //string size
 #define N_STRINGS 2                         //N of strings to split from the original string
@@ -12,7 +12,6 @@
 #define L_CONF_Y 30                         //Y config size (bigger means more precision but also more noise) (must be >= L_MOD_Y)
 #define L_MOD_X 5                           //X model size (bigger means more precision but also more noise)
 #define L_MOD_Y 30                          //Y model size (bigger means more precision but also more noise)
-#define L_TRIG 5                            //N of 0 in the model to stop calculating the configuration
 #define CONF_MULT 0.025                     //configuration multiplier used to calculate the multipliers for the configuration (should be the same in the validation)
 #define MAX_MULT 1                          //max multiplier
 
@@ -45,6 +44,7 @@ char input[LEN];                                                            //in
 double data [N_STRINGS][LEN/N_STRINGS][LEN/N_STRINGS] = {0};                //raw model [N of rep][rep dist to next rep N]
 double config [L_CONF_X][L_CONF_Y] = {0};                                   //contains configuration multipliers for the verification
 double C_data [LEN/N_STRINGS][LEN/N_STRINGS] = {0};                         //raw model [N of rep][rep dist to next rep N]
+double alig;
 
 void generate_C_model()
 {
@@ -87,11 +87,27 @@ void generate_C_model()
     }
 }
 
-void import_from_file() {
-    FILE *Model = fopen("Model.r4nd", "r");
-    FILE *Conf = fopen("Config.r4nd", "r");
-    int j, k;
+void import_from_file(const char *folderName) {
+    int j, k, i;
+    char currentDir[100];
+    if (getcwd(currentDir, sizeof(currentDir)) == NULL) {
+        printf("[*] [ERROR] Unable to find specified model\n");
+        return;
+    }
 
+    char folderPath[200];
+    snprintf(folderPath, sizeof(folderPath), "%s/%s", currentDir, folderName);
+
+    for (int i = 0; i < strlen(folderPath); i++) {
+    if (folderPath[i] == '\n') {
+        folderPath[i] = '\0';
+        break;
+    }
+}
+    char modelFilePath[100];
+    snprintf(modelFilePath, sizeof(modelFilePath), "%s/Model.r4nd", folderPath);
+
+    FILE *Model = fopen(modelFilePath, "r");
     if (Model) {
         for (j = 0; j < L_MOD_X; j++) {
             for (k = 0; k < L_MOD_Y; k++) {
@@ -105,21 +121,44 @@ void import_from_file() {
     else
     {
         printf("\n[*] [ERROR] Could not read model file\n");
+        abort();
     }
 
-    if (Conf) {
+    char configFilePath[100];
+    snprintf(configFilePath, sizeof(configFilePath), "%s/Multipliers.r4nd", folderPath);
+
+        printf("%s",configFilePath);
+
+    FILE *Config = fopen(configFilePath, "r");
+    if (Config) {
         for (j = 0; j < L_CONF_X; j++) {
             for (k = 0; k < L_CONF_Y; k++) {
-                fscanf(Conf, "%lf, ", &config[j][k]);
+                fscanf(Config, "%lf, ", &config[j][k]);
                 }
-            fscanf(Conf, "\n");
+            fscanf(Config, "\n");
             }
-        fclose(Conf);
-        printf("[*] Imported config\n\n");
+        fclose(Config);
+        printf("[*] Imported multipliers\n\n");
     }
     else
     {
         printf("\n[*] [ERROR] Could not read config file\n");
+        abort();
+    }
+
+    char aligFilePath[100];
+    snprintf(aligFilePath, sizeof(aligFilePath), "%s/Alignment.r4nd", folderPath);
+
+    FILE *Align = fopen(aligFilePath, "r");
+    if (Align) {
+        fscanf(Align, "%lf, ", &alig);
+        fclose(Align);
+        printf("[*] Imported alignment factor\n\n");
+    }
+    else
+    {
+        printf("\n[*] [ERROR] Could not read alignment file\n");
+        abort();
     }
 }
 float distance ()
@@ -171,12 +210,13 @@ void validateconfig()
 
 int main()
 {
-    int cmd = 0;
+    char folderName[100];
+
     char* banner =
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.0\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.1\n\n";
 
     printf("%s", banner);
 
@@ -184,11 +224,15 @@ int main()
 
     float Dist = 0;
 
+    printf("[*] Enter model ID: ");
+    fgets(folderName, 1000, stdin);
+    printf("\n");
+
+    import_from_file(folderName);
+
     printf("[*] Enter string to compare (%d chars): ", LEN/N_STRINGS);
     fgets(input, LEN/N_STRINGS, stdin);
     printf("\n");
-
-    import_from_file();
 
     printf("[*] Generating statistic model...");
     generate_C_model();
@@ -203,7 +247,7 @@ int main()
     printf("    [DONE]\n");
 
     printf("\n[*] [RESULTS] Stats:    Avg abs delta: [%lf] Max abs Delta: [%lf]  @ X: [%d] Y: [%d]", Avg_D, Max_D, Xm, Ym);
-    printf("\n[*] [RESULTS] Distance: Abs distance:  [%lf] Rel distance:  [%lf]\n\n", Dist, Max_D/Avg_D);
+    printf("\n[*] [RESULTS] Distance: Abs distance:  [%lf] Aligned distance: [%lf]  Rel distance:  [%lf]\n\n", Dist, fabs(Dist-alig), Max_D/Avg_D);
 
     return 0;
 }
