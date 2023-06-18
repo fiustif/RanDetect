@@ -13,6 +13,10 @@ Understand the results:
 If you are obtaining imprecise resuts try the following:
  * If the alignment factor, using the default configuration, is too high try with a bigger dataset
 
+How it works:
+ * The program analyzes the distance between repetitions of the same length. 
+
+Note: Im aware the code is not optimized, ill optimize it for the relase, suggestions and corrections are welcome.
 
 ![1](https://github.com/fiustif/RanDetect/assets/40177255/9b1103fd-a76c-49d3-863c-c24bef52f446)
 ![2](https://github.com/fiustif/RanDetect/assets/40177255/6d64f934-a3fd-4675-a7b1-ad794deb9913)
