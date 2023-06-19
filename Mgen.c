@@ -129,7 +129,11 @@ void save_to_file()
     struct stat st1 = {0};
     if (stat(folder_name, &st1) == -1)
     {
+        #ifdef _WIN32
+        mkdir(folder_name);
+        #else
         mkdir(folder_name, 0700);
+        #endif
     }
 
     char file_path[100];
@@ -204,7 +208,7 @@ int main()
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mGen 1.3\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mGen 1.3.1\n\n";
 
     printf("%s", banner);
 
