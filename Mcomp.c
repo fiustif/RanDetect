@@ -35,6 +35,7 @@ CONF_MULT:  2
 
 
 **/
+
 FILE* Model;
 FILE* Conf;
 float Avg_D = 0;
@@ -216,7 +217,7 @@ int main()
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.1.1\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.1.2\n\n";
 
     printf("%s", banner);
 
@@ -246,8 +247,8 @@ int main()
     Delt();
     printf("    [DONE]\n");
 
-    printf("\n[*] [RESULTS] Stats:    Avg abs delta: [%lf] Max abs Delta: [%lf]  @ X: [%d] Y: [%d]", Avg_D, Max_D, Xm, Ym);
-    printf("\n[*] [RESULTS] Distance: Abs distance:  [%lf] Aligned distance: [%lf]  Rel distance:  [%lf]\n\n", Dist, fabs(Dist-alig), Max_D/Avg_D);
+    printf("\n[*] [RESULTS] Stats:    Avg abs delta: [%lf] Max abs Delta: [%lf]  @ X: [%d] Y: [%d] Error: [%lf]", Avg_D, Max_D, Xm, Ym,(Avg_D/Max_D)*100);
+    printf("\n[*] [RESULTS] Distance: Abs distance:  [%lf] Aligned distance: [%lf]  Relative distance:  [%lf]\n\n", Dist, fabs(Dist-alig), fabs(Dist-alig)*((Avg_D/Max_D)*100));
 
     return 0;
 }
