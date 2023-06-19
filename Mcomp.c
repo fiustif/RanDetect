@@ -139,7 +139,7 @@ void import_from_file(const char *folderName) {
             fscanf(Config, "\n");
             }
         fclose(Config);
-        printf("[*] Imported multipliers\n\n");
+        printf("[*] Imported multipliers\n");
     }
     else
     {
