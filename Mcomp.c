@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 //comparator settings
 
@@ -21,10 +22,10 @@
 This is the model and configuration generator program for RanDetect.
 Casually developed by fiustif and Nick806 in 2023.
 
-Suggested settings for 8000 char dataset and 2000 char test sample:
+Suggested settings for 4000 char dataset and 2000 char test sample:
 
-LEN:        8000
-N_STRINGS:  4
+LEN:        4000
+N_STRINGS:  2
 L_CONF_X:   5
 L_CONF_Y:   30
 L_MOD_X:    L_CONF_X
@@ -41,7 +42,7 @@ float Max_D = 0;
 int Xm = 0;
 int Ym = 0;
 char input[LEN];                                                            //input dataset
-double data [N_STRINGS][LEN/N_STRINGS][LEN/N_STRINGS] = {0};                //raw model [N of rep][rep dist to next rep N]
+double data [LEN/N_STRINGS][LEN/N_STRINGS] = {0};                //raw model [N of rep][rep dist to next rep N]
 double config [L_CONF_X][L_CONF_Y] = {0};                                   //contains configuration multipliers for the verification
 double C_data [LEN/N_STRINGS][LEN/N_STRINGS] = {0};                         //raw model [N of rep][rep dist to next rep N]
 double alig;
@@ -89,13 +90,17 @@ void generate_C_model()
 
 void import_from_file(const char *folderName) {
     int j, k, i;
-    char currentDir[100];
+    char currentDir[200];
+    char folderPath[200];
+    char modelFilePath[200];
+    char configFilePath[200];
+    char aligFilePath[200];
+
     if (getcwd(currentDir, sizeof(currentDir)) == NULL) {
         printf("[*] [ERROR] Unable to find specified model\n");
         return;
     }
 
-    char folderPath[200];
     snprintf(folderPath, sizeof(folderPath), "%s/%s", currentDir, folderName);
 
     for (int i = 0; i < strlen(folderPath); i++) {
@@ -104,14 +109,13 @@ void import_from_file(const char *folderName) {
         break;
     }
 }
-    char modelFilePath[100];
     snprintf(modelFilePath, sizeof(modelFilePath), "%s/Model.r4nd", folderPath);
 
     FILE *Model = fopen(modelFilePath, "r");
     if (Model) {
         for (j = 0; j < L_MOD_X; j++) {
             for (k = 0; k < L_MOD_Y; k++) {
-                fscanf(Model, "%lf, ", &data[0][j][k]);
+                fscanf(Model, "%lf, ", &data[j][k]);
                 }
             fscanf(Model, "\n");
             }
@@ -124,10 +128,7 @@ void import_from_file(const char *folderName) {
         abort();
     }
 
-    char configFilePath[100];
     snprintf(configFilePath, sizeof(configFilePath), "%s/Multipliers.r4nd", folderPath);
-
-        printf("%s",configFilePath);
 
     FILE *Config = fopen(configFilePath, "r");
     if (Config) {
@@ -146,7 +147,6 @@ void import_from_file(const char *folderName) {
         abort();
     }
 
-    char aligFilePath[100];
     snprintf(aligFilePath, sizeof(aligFilePath), "%s/Alignment.r4nd", folderPath);
 
     FILE *Align = fopen(aligFilePath, "r");
@@ -169,7 +169,7 @@ float distance ()
     {
         for(x=0;x<L_MOD_Y;x++)
         {
-            Dist += fabs(data[0][i][x] - C_data[i][x])*config[i][x]; //calculate distance between the two datasets
+            Dist += fabs(data[i][x] - C_data[i][x])*config[i][x]; //calculate distance between the two datasets
         }
     }
     return Dist;
@@ -182,10 +182,10 @@ void Delt ()
     {
         for(x=0;x<L_MOD_Y;x++)
         {
-            Avg_D += fabs(data[0][i][x] - C_data[i][x])*config[i][x]; //calculate distance between the two datasets
-            if(fabs(data[0][i][x] - C_data[i][x])>Max_D)
+            Avg_D += fabs(data[i][x] - C_data[i][x])*config[i][x]; //calculate distance between the two datasets
+            if(fabs(data[i][x] - C_data[i][x])>Max_D)
             {
-                Max_D = data[0][i][x] - C_data[i][x];
+                Max_D = data[i][x] - C_data[i][x];
                 Xm = i;
                 Ym = x;
             }
@@ -216,7 +216,7 @@ int main()
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.1\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.1.1\n\n";
 
     printf("%s", banner);
 
@@ -225,7 +225,7 @@ int main()
     float Dist = 0;
 
     printf("[*] Enter model ID: ");
-    fgets(folderName, 1000, stdin);
+    fgets(folderName, 100, stdin);
     printf("\n");
 
     import_from_file(folderName);
