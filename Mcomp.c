@@ -10,11 +10,12 @@
 #define LEN 4000                            //string size
 #define N_STRINGS 2                         //N of strings to split from the original string
 #define L_CONF_X 5                          //X config size (bigger means more precision but also more noise) (must be >= L_MOD_Y)
-#define L_CONF_Y 30                         //Y config size (bigger means more precision but also more noise) (must be >= L_MOD_Y)
+#define L_CONF_Y 15                         //Y config size (bigger means more precision but also more noise) (must be >= L_MOD_Y)
 #define L_MOD_X 5                           //X model size (bigger means more precision but also more noise)
-#define L_MOD_Y 30                          //Y model size (bigger means more precision but also more noise)
+#define L_MOD_Y 15                          //Y model size (bigger means more precision but also more noise)
 #define CONF_MULT 0.025                     //configuration multiplier used to calculate the multipliers for the configuration (should be the same in the validation)
 #define MAX_MULT 1                          //max multiplier
+#define CORRECTION_MULT 0.001               //correction multiplier used to correct results
 
 /**
 
@@ -48,45 +49,45 @@ double config [L_CONF_X][L_CONF_Y] = {0};                                   //co
 double C_data [LEN/N_STRINGS][LEN/N_STRINGS] = {0};                         //raw model [N of rep][rep dist to next rep N]
 double alig;
 
-void generate_C_model()
+bool num_rep(int rep_type, int position){
+
+    int x;
+    char a = input[position];
+
+    for (x = 1; x < rep_type; x++){
+        if (a != input[position + x])
+            return 0;
+    }
+
+    if (a == input[position-1])
+        return 0;
+    if (a == input[position+rep_type])
+        return 0;
+
+    return 1;
+}
+
+void generate_C_model()                     //model generation
 {
     int i, x, k;                            //for cycles variables
     int c1 = 0;                             //rep len counter
     int c2 = 0;                             //distance counter
     char s1 = input[0];                     //last char
-    bool B;                                 //is repeated (used in the first cycle)
+    bool B = 0;                             //is repeated (used in the first cycle)
 
-    for(i=1;i<LEN/N_STRINGS;i++)
-    {
-        c1 = 0;
+    for (c1 = 1; c1 <= L_MOD_X; c1++){
         c2 = 0;
-        B = 0;
-        for(x=1;x<LEN/N_STRINGS;x++)
+
+        for(x=1;x<(LEN/N_STRINGS)-c1;x++)
         {
-            c2++;
-            if(input[x]==s1)
-            {
-                c1++;
-            }
-            else
-            {
-                if(c1==i)
-                {
-                    if (B == 1)
-                    {
-                        C_data[i-1][c2-i]++;
-                        c2=0;
-                    }
-                    else
-                    {
-                        B = 1;
-                    }
-                }
-                c1=0;
-                s1=input[x];
+            if (num_rep(c1, x)==1){
+                C_data[c1-1][x - c2-1]++;
+                c2 = x;
             }
         }
     }
+
+    return;
 }
 
 void import_from_file(const char *folderName) {
@@ -217,7 +218,7 @@ int main()
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.1.2\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.2.0\n\n";
 
     printf("%s", banner);
 
@@ -247,8 +248,8 @@ int main()
     Delt();
     printf("    [DONE]\n");
 
-    printf("\n[*] [RESULTS] Stats:    Avg abs delta: [%lf] Max abs Delta: [%lf]  @ X: [%d] Y: [%d] Error: [%lf]", Avg_D, Max_D, Xm, Ym,(Avg_D/Max_D)*100);
-    printf("\n[*] [RESULTS] Distance: Abs distance:  [%lf] Aligned distance: [%lf]  Relative distance:  [%lf]\n\n", Dist, fabs(Dist-alig), fabs(Dist-alig)*((Avg_D/Max_D)*100));
+    printf("\n[*] [RESULTS] Stats:    Avg abs delta: [%lf] Max abs Delta: [%lf]  @ X: [%d] Y: [%d] Precision: [%lf]", Avg_D, Max_D, Xm, Ym,Avg_D*Max_D*CORRECTION_MULT);
+    printf("\n[*] [RESULTS] Distance: Abs distance:  [%lf] Aligned distance: [%lf]  Relative distance:  [%lf]\n\n", Dist, fabs(Dist-alig), (fabs(Dist-alig)*(Avg_D*Max_D))*CORRECTION_MULT);
 
     return 0;
 }
