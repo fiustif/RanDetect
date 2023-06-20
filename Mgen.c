@@ -41,6 +41,25 @@ double data [N_STRINGS][LEN/N_STRINGS][LEN/N_STRINGS] = {0};                //ra
 double mult [L_CONF_X][L_CONF_Y] = {0};                                   //contains configuration multipliers for the verification
 float Dist;
 
+bool num_rep(int rep_type, int position){
+
+    int x;
+    char a = input[position];
+
+    for (x = 1; x < rep_type; x++){
+        if (a != input[position + x])
+            return 0;
+    }
+
+    if (a == input[position-1])
+        return 0;
+    if (a == input[position+rep_type])
+        return 0;
+
+    return 1;
+
+}
+
 void generate_model()                       //model generation
 {
     int i, x, k;                            //for cycles variables
@@ -49,34 +68,20 @@ void generate_model()                       //model generation
     char s1 = input[0];                     //last char
     bool B;                                 //is repeated (used in the first cycle)
     for(k=0;k<N_STRINGS;k++)
-    for(i=1;i<LEN/N_STRINGS;i++)            //find i rep
     {
         c1 = 0;
         c2 = 0;
         B = 0;
-        for(x=1+(k*LEN/N_STRINGS);x<(k+1)*LEN/N_STRINGS;x++)
-        {
-            c2++;
-            if(input[x]==s1)
+
+        for (c1 = 1; c1 <= L_MOD_X; c1++){
+            c2 = 1+(k*LEN/N_STRINGS);
+
+            for(x=1+(k*LEN/N_STRINGS);x<(k+1)*LEN/N_STRINGS-c1;x++)
             {
-                c1++;
-            }
-            else
-            {
-                if(c1==i)
-                {
-                    if (B == 1)
-                    {
-                        data[k][i-1][c2-i]++;
-                        c2=0;
-                    }
-                    else
-                    {
-                        B = 1;
-                    }
+                if (num_rep(c1, x)==1){
+                    data[k][c1-1][x - c2-1]++;
+                    c2 = x;
                 }
-                c1=0;
-                s1=input[x];
             }
         }
     }
@@ -184,7 +189,7 @@ void align_model ()    //needed for non optimized configurations
             Dist += fabs(data[0][i][x] - data[k][i][x])*mult[i][x]; //calculate distance between the strings and the generated dataset
         }
     }
-    Dist = Dist/N_STRINGS;
+    Dist = Dist/(N_STRINGS-1);
 }
 
 void validateconfig()
@@ -208,7 +213,7 @@ int main()
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mGen 1.3.1\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mGen 1.4.0\n\n";
 
     printf("%s", banner);
 
