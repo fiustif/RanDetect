@@ -1,22 +1,36 @@
 # RanDetect
 C program to detect who wrote a random string
 
-Usage:
- * Compile both Mgen and Mcomp
+**Usage**
+-
+ * Compile both Mgen and Mcomp 
+	 *	linux: `gcc Mgen.c -o Mgen & gcc Mcomp.c -o Mcomp`
  * Run Mgen and create a model (the sample string needs to be only of 1 and 0)
+	 * `./Mgen`
  * Run Mcomp and compare a string to the model
+	 * `./Mcomp`
 
-Understand the results:
- * The Distance is the most significative factor, it indicates the distance between the model and the string you are comparing it with.
- * The stats are only for debugging the model, you can use them to tweak your configuration to achieve better results.
+**Understanding the results**
+ * 
+ * **Stats**:
+	 - Avg abs delta: average of all absolute delta between the model and the string you are comparing it with
+	 - Max abs Delta: maximum difference between the model and the string you are comparing it with
+	 - Precision: higher this value the less precise the results are
+ * **Distance**
+	 - Abs distance: sum of all absoulte delta
+	 - Aligned distance: abs distance - alignment factor 
+	 - Relative distance: aligned distance * precision 
+*(the higher these values, the more unlikely it is that the string you are comparing belongs to the model)*
 
-If you are obtaining imprecise resuts try the following:
- * If the alignment factor, using the default configuration, is too high try with a bigger dataset
+**If you are obtaining imprecise resuts try the following:**
+ * First of all make sure your Mgen configuration matches the Mcomp configuration.
+ * If the alignment factor, using the default configuration, is too high try with a bigger dataset.
+ * If the distance seems too high when comparing to a string that belongs to the model try changing the multipliers.
 
-How it works:
- * The program analyzes the distance between repetitions of the same length. 
+**How it works:**
 
-Note: Im aware the code is not optimized, ill optimize it for the relase, suggestions and corrections are welcome.
+ * Mgen analyzes the distance between repetitions of the same length, then generates multipliers to reduce noise.
+ * Mcomp compares the model generated with Mgen and the input string.
 
-![1](https://github.com/fiustif/RanDetect/assets/40177255/9b1103fd-a76c-49d3-863c-c24bef52f446)
-![2](https://github.com/fiustif/RanDetect/assets/40177255/6d64f934-a3fd-4675-a7b1-ad794deb9913)
+**Note:** Im aware the code is not optimized, ill optimize it for the relase, suggestions and corrections are welcome.
+
