@@ -11,7 +11,7 @@ C program to detect who wrote a random string
 	 * `./Mcomp`
 
 **Understanding the results**
- * 
+
  * **Stats**:
 	 - Avg abs delta: average of all absolute delta between the model and the string you are comparing it with
 	 - Max abs Delta: maximum difference between the model and the string you are comparing it with
