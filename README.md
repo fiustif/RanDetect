@@ -34,3 +34,7 @@ C program to detect who wrote a random string
 
 **Note:** Im aware the code is not optimized, ill optimize it for the relase, suggestions and corrections are welcome.
 
+
+![2](https://github.com/fiustif/RanDetect/assets/40177255/321a3ad4-61bc-4654-b7b5-3069631ae4bc)
+![1](https://github.com/fiustif/RanDetect/assets/40177255/ddf37463-7201-4aca-b394-8b54bc36acc6)
+
