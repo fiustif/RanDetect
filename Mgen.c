@@ -172,7 +172,7 @@ void save_to_file()
     snprintf(file_path, sizeof(file_path), "%s/Alignment.r4nd", folder_name);
     FILE *Allign = fopen(file_path, "w");
     if (Allign) {
-        fprintf(Allign, "%lf ", Dist);
+        fprintf(Allign, "%lf, %d, %d, %d, %d, ", Dist, LEN, N_STRINGS, L_CONF_X, L_CONF_Y );
     }
 
     return;
@@ -213,7 +213,7 @@ int main()
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mGen 1.4.0\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mGen 1.4.1\n\n";
 
     printf("%s", banner);
 
