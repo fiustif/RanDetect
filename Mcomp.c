@@ -15,7 +15,7 @@
 #define L_MOD_Y 15                          //Y model size (bigger means more precision but also more noise)
 #define CONF_MULT 0.025                     //configuration multiplier used to calculate the multipliers for the configuration (should be the same in the validation)
 #define MAX_MULT 1                          //max multiplier
-#define CORRECTION_MULT 0.001               //correction multiplier used to correct results
+#define CORRECTION_MULT 0.001               //correction multiplier used to correct results (ideally not needed)
 
 /**
 
@@ -36,7 +36,7 @@ CONF_MULT:  2
 
 
 **/
-
+int len, nstrings, confX, confY;
 FILE* Model;
 FILE* Conf;
 float Avg_D = 0;
@@ -153,9 +153,9 @@ void import_from_file(const char *folderName) {
 
     FILE *Align = fopen(aligFilePath, "r");
     if (Align) {
-        fscanf(Align, "%lf, ", &alig);
+        fscanf(Align, "%lf, %d, %d, %d, %d", &alig, &len, &nstrings, &confX, &confY);
         fclose(Align);
-        printf("[*] Imported alignment factor\n\n");
+        printf("[*] Imported alignment factor\n");
     }
     else
     {
@@ -200,14 +200,28 @@ void validateconfig()
 {
     if  (LEN%N_STRINGS!=0)
     {
-        printf("[*] [ERROR] Invalid configuration detected, the sample length must be divisible by the number of strings.");
+        printf("\n[*] [ERROR] Invalid configuration detected, the sample length must be divisible by the number of strings.");
         abort();
     }
     if  (L_CONF_X < L_MOD_X || L_CONF_Y < L_MOD_Y)
     {
-        printf("[*] [ERROR] Invalid configuration detected, the size of the config array must be bigger or equal to the model size.");
+        printf("\n[*] [ERROR] Invalid configuration detected, the size of the config array must be bigger or equal to the model size.");
         abort();
     }
+    if (LEN!=len || N_STRINGS!= nstrings)
+    {
+        printf("\n[*] [WARNING] The string length or the number of strings are not the same as in the model, this may affect the results.");
+    }
+    if (L_CONF_X>confX || L_CONF_Y> confY)
+    {
+        printf("\n[*] [ERROR] Invalid configuration detected, the size of the config array must be smaller or equal to the model.");
+        abort();
+    }
+    else if (L_CONF_X!=confX || L_CONF_Y!=confY)
+    {
+        printf("\n[*] [WARNING] The size of the config array is not the same as the model, this may affect the results.");
+    }
+    printf("\n");
 }
 
 int main()
@@ -218,21 +232,19 @@ int main()
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.2.0\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.2.1\n\n";
 
     printf("%s", banner);
-
-    validateconfig();
 
     float Dist = 0;
 
     printf("[*] Enter model ID: ");
     fgets(folderName, 100, stdin);
-    printf("\n");
-
     import_from_file(folderName);
 
-    printf("[*] Enter string to compare (%d chars): ", LEN/N_STRINGS);
+    validateconfig();
+
+    printf("\n[*] Enter string to compare (%d chars): ", LEN/N_STRINGS);
     fgets(input, LEN/N_STRINGS, stdin);
     printf("\n");
 
