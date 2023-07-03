@@ -1,3 +1,4 @@
+
 # RanDetect
 C program to detect who wrote a random string
 
@@ -26,6 +27,13 @@ C program to detect who wrote a random string
  * First of all make sure your Mgen configuration matches the Mcomp configuration.
  * If the alignment factor, using the default configuration, is too high try with a bigger dataset.
  * If the distance seems too high when comparing to a string that belongs to the model try changing the multipliers.
+
+**Tweaking the configuration**
+-
+ * `L_CONF_X/L_CONF_Y` and ` L_MOD_X/L_MOD_Y` 
+ define the size of the multipliers array and the model array, modifying this values can increase the precision, but can also increase noise, to reduce noise increase the input dataset size and check alignment, if you have a low alignment value you can safely increase this values.
+ * `LEN` and `N_STRINGS`define the size of the input dataset (`LEN`) and the size of the string you want to compare it (`LEN/N_STRINGS`).
+ * `CONF_MULT`and`MAX_MULT`define the multipliers for the model, we suggest to not modify this values.
 
 **How it works:**
 
