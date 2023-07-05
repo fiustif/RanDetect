@@ -16,6 +16,7 @@
 #define L_MOD_Y 30                          //Y model size (bigger means more precision but also more noise)
 #define CONF_MULT 0.025                     //configuration multiplier used to calculate the multipliers for the configuration (should be the same in the validation)
 #define MAX_MULT 1                          //max multiplier
+#define VERSION 142                        //Version id, do not modify this value
 
 /**
 
@@ -37,7 +38,7 @@ CONF_MULT:  2
 **/
 
 char input[LEN];                                                            //input dataset
-double data [N_STRINGS][LEN/N_STRINGS][LEN/N_STRINGS] = {0};                //raw model [N of rep][rep dist to next rep N]
+double data [N_STRINGS][L_MOD_X][LEN/N_STRINGS] = {0};                //raw model [N of rep][rep dist to next rep N]
 double mult [L_CONF_X][L_CONF_Y] = {0};                                   //contains configuration multipliers for the verification
 float Dist;
 
@@ -111,9 +112,9 @@ void generate_multipliers()                      //generate multipliers for the 
 void normalize_model()
 {
     int i, x, k;
-    for(i=0;i<LEN/N_STRINGS;i++)                 //calculate average absolute delta between reps
+    for(i=0;i<L_MOD_X;i++)                 //calculate average absolute delta between reps
     {
-        for(x=0;x<LEN/N_STRINGS;x++)
+        for(x=0;x<L_MOD_Y;x++)
         {
             for(k=0;k<N_STRINGS;k++)
             {
@@ -172,7 +173,7 @@ void save_to_file()
     snprintf(file_path, sizeof(file_path), "%s/Alignment.r4nd", folder_name);
     FILE *Allign = fopen(file_path, "w");
     if (Allign) {
-        fprintf(Allign, "%lf, %d, %d, %d, %d, ", Dist, LEN, N_STRINGS, L_CONF_X, L_CONF_Y );
+        fprintf(Allign, "%lf, %d, %d, %d, %d, %d, ", Dist, LEN, N_STRINGS, L_CONF_X, L_CONF_Y, VERSION);
     }
 
     return;
@@ -213,7 +214,7 @@ int main()
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mGen 1.4.1\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mGen 1.4.2\n\n";
 
     printf("%s", banner);
 
