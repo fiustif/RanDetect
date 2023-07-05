@@ -10,9 +10,9 @@
 #define LEN 4000                            //string size
 #define N_STRINGS 2                         //N of strings to split from the original string
 #define L_CONF_X 5                          //X config size (bigger means more precision but also more noise) (must be >= L_MOD_Y)
-#define L_CONF_Y 15                         //Y config size (bigger means more precision but also more noise) (must be >= L_MOD_Y)
+#define L_CONF_Y 30                         //Y config size (bigger means more precision but also more noise) (must be >= L_MOD_Y)
 #define L_MOD_X 5                           //X model size (bigger means more precision but also more noise)
-#define L_MOD_Y 15                          //Y model size (bigger means more precision but also more noise)
+#define L_MOD_Y 30                          //Y model size (bigger means more precision but also more noise)
 #define CONF_MULT 0.025                     //configuration multiplier used to calculate the multipliers for the configuration (should be the same in the validation)
 #define MAX_MULT 1                          //max multiplier
 #define CORRECTION_MULT 0.001               //correction multiplier used to correct results (ideally not needed)
@@ -36,7 +36,7 @@ CONF_MULT:  2
 
 
 **/
-int len, nstrings, confX, confY;
+int len, nstrings, confX, confY, version;
 FILE* Model;
 FILE* Conf;
 float Avg_D = 0;
@@ -44,7 +44,7 @@ float Max_D = 0;
 int Xm = 0;
 int Ym = 0;
 char input[LEN];                                                            //input dataset
-double data [LEN/N_STRINGS][LEN/N_STRINGS] = {0};                //raw model [N of rep][rep dist to next rep N]
+double data [L_MOD_X][L_MOD_Y] = {0};                //raw model [N of rep][rep dist to next rep N]
 double config [L_CONF_X][L_CONF_Y] = {0};                                   //contains configuration multipliers for the verification
 double C_data [LEN/N_STRINGS][LEN/N_STRINGS] = {0};                         //raw model [N of rep][rep dist to next rep N]
 double alig;
@@ -78,7 +78,7 @@ void generate_C_model()                     //model generation
     for (c1 = 1; c1 <= L_MOD_X; c1++){
         c2 = 0;
 
-        for(x=1;x<(LEN/N_STRINGS)-c1;x++)
+        for(x=1;x<L_MOD_Y-c1;x++)
         {
             if (num_rep(c1, x)==1){
                 C_data[c1-1][x - c2-1]++;
@@ -153,7 +153,7 @@ void import_from_file(const char *folderName) {
 
     FILE *Align = fopen(aligFilePath, "r");
     if (Align) {
-        fscanf(Align, "%lf, %d, %d, %d, %d", &alig, &len, &nstrings, &confX, &confY);
+        fscanf(Align, "%lf, %d, %d, %d, %d, %d, ", &alig, &len, &nstrings, &confX, &confY, &version);
         fclose(Align);
         printf("[*] Imported alignment factor\n");
     }
@@ -198,6 +198,7 @@ void Delt ()
 
 void validateconfig()
 {
+    bool err = 0;
     if  (LEN%N_STRINGS!=0)
     {
         printf("\n[*] [ERROR] Invalid configuration detected, the sample length must be divisible by the number of strings.");
@@ -211,6 +212,7 @@ void validateconfig()
     if (LEN!=len || N_STRINGS!= nstrings)
     {
         printf("\n[*] [WARNING] The string length or the number of strings are not the same as in the model, this may affect the results.");
+        err++;
     }
     if (L_CONF_X>confX || L_CONF_Y> confY)
     {
@@ -220,8 +222,19 @@ void validateconfig()
     else if (L_CONF_X!=confX || L_CONF_Y!=confY)
     {
         printf("\n[*] [WARNING] The size of the config array is not the same as the model, this may affect the results.");
+        err++;
     }
-    printf("\n");
+    switch(version)
+    {
+    case 142:
+        break;
+    default:
+        printf("\n[*] [ERROR] Unsupported model version detected.");
+        abort();
+    }
+    if (err){
+        printf("\n");
+    }
 }
 
 int main()
@@ -232,7 +245,7 @@ int main()
         "   ___            ___      __          __ \n"
         "  / _ \\___ ____  / _ \\___ / /____ ____/ /_\n"
         " / , _/ _ `/ _ \\/ // / -_) __/ -_) __/ __/\n"
-        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.2.1\n\n";
+        "/_/|_|\\_,_/_//_/____/\\__/\\__/\\__/\\__/\\__/ mComp 1.3.2\n\n";
 
     printf("%s", banner);
 
