@@ -1,4 +1,5 @@
 
+
 # RanDetect
 C program to detect who wrote a random string
 
@@ -39,6 +40,14 @@ C program to detect who wrote a random string
 
  * Mgen analyzes the distance between repetitions of the same length, then generates multipliers to reduce noise.
  * Mcomp compares the model generated with Mgen and the input string.
+
+**TODO**
+-
+* Add multiple models support to Mcomp and Mgen
+* Add input txt file support
+* Add input filters
+
+#
 
 **Note:** Im aware the code is not optimized, ill optimize it for the relase, suggestions and corrections are welcome.
 
