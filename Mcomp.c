@@ -67,18 +67,17 @@ bool num_rep(int rep_type, int position){
     return 1;
 }
 
-void generate_C_model()                     //model generation
+void generate_C_model()                       //model generation
 {
-    int i, x, k;                            //for cycles variables
+    int i, x;                               //for cycles variables
     int c1 = 0;                             //rep len counter
     int c2 = 0;                             //distance counter
     char s1 = input[0];                     //last char
-    bool B = 0;                             //is repeated (used in the first cycle)
 
     for (c1 = 1; c1 <= L_MOD_X; c1++){
-        c2 = 0;
+        c2 = 1;
 
-        for(x=1;x<L_MOD_Y-c1;x++)
+        for(x=1;x< LEN-c1;x++)
         {
             if (num_rep(c1, x)==1){
                 C_data[c1-1][x - c2-1]++;
