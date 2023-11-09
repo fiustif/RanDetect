@@ -1,7 +1,7 @@
 
 
 # RanDetect
-C program to detect who wrote a random string
+Pattern detection in random strings written in C 
 
 **Usage**
 -
