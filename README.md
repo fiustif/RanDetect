@@ -1,5 +1,3 @@
-
-
 # RanDetect
 Pattern detection in random strings written in C 
 
@@ -11,6 +9,10 @@ Pattern detection in random strings written in C
 	 * `./Mgen`
  * Run Mcomp and compare a string to the model
 	 * `./Mcomp`
+
+**Visualizing results as 3d graphs:**
+* Run RanDetect Visualizer
+	 * `python3 Visualizer.py`
 
 **Understanding the results**
 -
@@ -44,14 +46,19 @@ Pattern detection in random strings written in C
 **TODO**
 -
 * Add multiple models support to Mcomp and Mgen
-* Add input txt file support
+* Add input txt file support and remove cmd input for random strings
 * Add input filters
+* Add Visualizer support for mComp
 
 #
 
-**Note:** Im aware the code is not optimized, ill optimize it for the relase, suggestions and corrections are welcome.
+**Note:** I'm aware the code is not optimized, I'll optimize it for the relase, suggestions and corrections are welcome.
+#
+**Model and Multipliers data visualized as 3D graph using Visualizer:**
 
+![graphs](https://github.com/fiustif/RanDetect/assets/40177255/36650b69-7908-4cb2-b8de-eff3e96b659f)
+
+**Examples:**
 
 ![2](https://github.com/fiustif/RanDetect/assets/40177255/321a3ad4-61bc-4654-b7b5-3069631ae4bc)
 ![1](https://github.com/fiustif/RanDetect/assets/40177255/ddf37463-7201-4aca-b394-8b54bc36acc6)
-
