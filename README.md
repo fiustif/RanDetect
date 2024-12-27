@@ -1,5 +1,5 @@
 # RanDetect
-Pattern detection in random strings written in C 
+Pattern detection in random strings written in C (simple one layer neural network entirely coded in C)
 
 **Usage**
 -
